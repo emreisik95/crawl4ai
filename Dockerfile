@@ -7,17 +7,13 @@ ARG INSTALL_OPTION=default
 # Install dependencies and Chromium/ChromiumDriver
 RUN apt-get update && apt-get install -y --no-install-recommends \
     wget xvfb unzip curl gnupg2 ca-certificates apt-transport-https software-properties-common \
-    chromium chromium-driver
+    chromium chromium-driver && \
+    rm -rf /var/lib/apt/lists/*
 
 # Copy application code
 COPY . .
 
-# Optional installation of Transformers based on INSTALL_OPTION
-RUN if [ "$INSTALL_OPTION" = "all" ] || [ "$INSTALL_OPTION" = "transformer" ]; then \
-        pip install --no-cache-dir transformers; \
-    fi
-
-# Install Python dependencies and specific packages based on INSTALL_OPTION
+# Install Python dependencies based on INSTALL_OPTION
 RUN if [ "$INSTALL_OPTION" = "all" ]; then \
         pip install --no-cache-dir .[all] numpy && \
         crawl4ai-download-models; \
