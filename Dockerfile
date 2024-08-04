@@ -47,15 +47,14 @@ RUN if [ "$INSTALL_OPTION" = "all" ]; then \
 RUN apt-get update && \
     apt-get install -y chromium
 
-# Firefox ve Geckodriver'ı yükleyin
+# Install Firefox and Geckodriver
 RUN apt-get update && \
-    apt-get install -y firefox-esr && \
-    apt-get install -y wget && \
-    wget https://github.com/mozilla/geckodriver/releases/latest/download/geckodriver-v0.33.0-linux-aarch64.tar.gz && \
-    tar -xzf geckodriver-v0.33.0-linux-aarch64.tar.gz && \
+    apt-get install -y firefox-esr wget && \
+    wget https://github.com/mozilla/geckodriver/releases/latest/download/geckodriver-v0.34.0-linux-aarch64.tar.gz && \
+    tar -xzf geckodriver-v0.34.0-linux-aarch64.tar.gz && \
     mv geckodriver /usr/local/bin/ && \
     chmod +x /usr/local/bin/geckodriver && \
-    rm geckodriver-v0.33.0-linux-aarch64.tar.gz
+    rm geckodriver-v0.34.0-linux-aarch64.tar.gz
 
 # Selenium'u Geckodriver ile çalışacak şekilde yapılandırın
 ENV SELENIUM_BROWSER=firefox
