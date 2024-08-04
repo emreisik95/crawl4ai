@@ -8,18 +8,22 @@ WORKDIR /usr/src/app
 ARG INSTALL_OPTION=default
 
 # Install build dependencies
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
+# Install dependencies for Chrome and ChromeDriver
+RUN apt-get update && apt-get install -y --no-install-recommends \
     wget \
-    git \
-    curl \
-    unzip \
-    gnupg \
     xvfb \
+    unzip \
+    curl \
+    gnupg2 \
     ca-certificates \
     apt-transport-https \
-    software-properties-common && \
-    rm -rf /var/lib/apt/lists/*
+    software-properties-common \
+    && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
+    && echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list \
+    && apt-get update \
+    && apt-get install -y google-chrome-stable \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt install chromium-chromedriver -y
 
 # Copy the application code
 COPY . .
