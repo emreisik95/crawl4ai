@@ -39,16 +39,12 @@ RUN if [ "$INSTALL_OPTION" = "all" ]; then \
         pip install --no-cache-dir .; \
     fi
 
-# Install Google Chrome
-RUN wget -q https://dl.google.com/linux/linux_signing_key.pub && \
-    gpg --dearmor -o /usr/share/keyrings/google-chrome.gpg linux_signing_key.pub && \
-    echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" | tee /etc/apt/sources.list.d/google-chrome.list && \
-    apt-get update && \
-    apt-get install -y google-chrome-stable && \
-    rm linux_signing_key.pub
+# Install Chromium
+RUN apt-get update && \
+    apt-get install -y chromium
 
-# Set environment to use Chrome properly
-ENV CHROME_BIN=/usr/bin/google-chrome \
+# Set environment to use Chromium properly
+ENV CHROME_BIN=/usr/bin/chromium \
     DISPLAY=:99 \
     DBUS_SESSION_BUS_ADDRESS=/dev/null \
     PYTHONUNBUFFERED=1
