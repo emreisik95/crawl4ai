@@ -6,7 +6,7 @@ WORKDIR /usr/src/app
 # Define build arguments
 ARG INSTALL_OPTION=default
 
-# Install build dependencies
+# Install build dependencies and Chromium
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     wget \
@@ -17,7 +17,9 @@ RUN apt-get update && \
     xvfb \
     ca-certificates \
     apt-transport-https \
-    software-properties-common && \
+    software-properties-common \
+    chromium-driver \
+    chromium && \
     rm -rf /var/lib/apt/lists/*    
 
 # Copy the application code
@@ -38,19 +40,11 @@ RUN if [ "$INSTALL_OPTION" = "all" ]; then \
         pip install --no-cache-dir . numpy; \
     fi
 
-# Install Chromium
-RUN apt-get update && \
-    apt-get install -y chromium && \
-    rm -rf /var/lib/apt/lists/*
-
 # Set environment to use Chromium properly
 ENV CHROME_BIN=/usr/bin/chromium \
     DISPLAY=:99 \
     DBUS_SESSION_BUS_ADDRESS=/dev/null \
     PYTHONUNBUFFERED=1
-
-# Ensure the PATH environment variable includes the location of the installed packages
-ENV PATH=/opt/conda/bin:$PATH   
 
 # Make port 80 available to the world outside this container
 EXPOSE 80
