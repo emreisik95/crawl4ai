@@ -27,16 +27,16 @@ COPY . .
 # Install Crawl4AI using the local setup.py with the specified option
 # and download models only for torch, transformer, or all options
 RUN if [ "$INSTALL_OPTION" = "all" ]; then \
-        pip install --no-cache-dir .[all] && \
+        pip install --no-cache-dir .[all] numpy && \
         crawl4ai-download-models; \
     elif [ "$INSTALL_OPTION" = "torch" ]; then \
-        pip install --no-cache-dir .[torch] && \
+        pip install --no-cache-dir .[torch] numpy && \
         crawl4ai-download-models; \
     elif [ "$INSTALL_OPTION" = "transformer" ]; then \
-        pip install --no-cache-dir .[transformer] && \
+        pip install --no-cache-dir .[transformer] numpy && \
         crawl4ai-download-models; \
     else \
-        pip install --no-cache-dir .; \
+        pip install --no-cache-dir . numpy; \
     fi
 
 # Install Chromium
