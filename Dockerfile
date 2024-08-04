@@ -18,12 +18,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     apt-transport-https \
     software-properties-common \
-    && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
-    && echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list \
+    && install -m 0755 -d /etc/apt/keyrings \
+    && curl -fsSL https://dl-ssl.google.com/linux/linux_signing_key.pub | tee /etc/apt/keyrings/google-chrome.asc \
+    && echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/google-chrome.asc] http://dl.google.com/linux/chrome/deb/ stable main" | tee /etc/apt/sources.list.d/google-chrome.list > /dev/null \
     && apt-get update \
     && apt-get install -y google-chrome-stable \
     && rm -rf /var/lib/apt/lists/* \
-    && apt install chromium-chromedriver -y
+    && apt-get install -y chromium-chromedriver
 
 # Copy the application code
 COPY . .
@@ -60,7 +61,7 @@ RUN apt-get update && \
     chmod +x /usr/local/bin/geckodriver && \
     rm geckodriver-v0.34.0-linux64.tar.gz
     
-# Selenium'u Geckodriver ile çalışacak şekilde yapılandırın
+# Configure Selenium to use Geckodriver with Firefox
 ENV SELENIUM_BROWSER=firefox
 
 # Set environment to use Chromium and ChromeDriver properly
