@@ -1,17 +1,41 @@
-# Base image
-FROM python:3.9-slim
+# Use an official Python runtime as a parent image
+FROM python:3.10-slim
 
-# Set work directory
-WORKDIR /app
+# Set the working directory in the container
+WORKDIR /usr/src/app
 
-# Copy project files
-COPY . /app
+# Copy the current directory contents into the container at /usr/src/app
+COPY . .
 
-# Install dependencies
+# Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Expose port 80 instead of 8000
+# Install dependencies for Chromium and ChromeDriver
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    wget \
+    xvfb \
+    unzip \
+    curl \
+    gnupg2 \
+    ca-certificates \
+    apt-transport-https \
+    software-properties-common \
+    chromium-browser \
+    chromium-chromedriver \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install spacy library using pip
+RUN pip install spacy
+
+# Set display port and dbus env to avoid hanging
+ENV DISPLAY=:99
+ENV DBUS_SESSION_BUS_ADDRESS=/dev/null
+
+# Make port 80 available to the world outside this container
 EXPOSE 80
 
-# Start the application, binding it to port 80 instead of 8000
-CMD ["mkdocs", "serve", "--dev-addr=0.0.0.0:80"]
+# Define environment variable
+ENV PYTHONUNBUFFERED 1
+
+# Run uvicorn
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80", "--workers", "4"]
