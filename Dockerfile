@@ -47,12 +47,18 @@ RUN if [ "$INSTALL_OPTION" = "all" ]; then \
 RUN apt-get update && \
     apt-get install -y chromium
 
-# Download the latest ChromeDriver compatible with ARM64
-RUN wget https://chromedriver.storage.googleapis.com/$(wget -qO- https://chromedriver.storage.googleapis.com/LATEST_RELEASE)/chromedriver_linux64.zip && \
-    unzip chromedriver_linux64.zip && \
-    mv chromedriver /usr/local/bin/chromedriver && \
-    chmod +x /usr/local/bin/chromedriver && \
-    rm chromedriver_linux64.zip
+# Firefox ve Geckodriver'ı yükleyin
+RUN apt-get update && \
+    apt-get install -y firefox-esr && \
+    apt-get install -y wget && \
+    wget https://github.com/mozilla/geckodriver/releases/latest/download/geckodriver-v0.33.0-linux-aarch64.tar.gz && \
+    tar -xzf geckodriver-v0.33.0-linux-aarch64.tar.gz && \
+    mv geckodriver /usr/local/bin/ && \
+    chmod +x /usr/local/bin/geckodriver && \
+    rm geckodriver-v0.33.0-linux-aarch64.tar.gz
+
+# Selenium'u Geckodriver ile çalışacak şekilde yapılandırın
+ENV SELENIUM_BROWSER=firefox
 
 # Set environment to use Chromium and ChromeDriver properly
 ENV CHROME_BIN=/usr/bin/chromium \
