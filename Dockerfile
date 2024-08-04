@@ -23,10 +23,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Download and setup Chromium for ARM architecture
-RUN wget https://github.com/macchrome/winchrome/releases/download/v110.0.5481.100-r1026311-Linux/bin-arm64.zip && \
-    unzip bin-arm64.zip -d /usr/local/bin/chromium && \
+RUN wget https://archlinuxarm.org/packages/aarch64/chromium/download && \
+    tar -xvf download -C /usr/local/bin/chromium && \
     ln -s /usr/local/bin/chromium/chrome /usr/local/bin/chromium-browser && \
-    rm bin-arm64.zip
+    rm download
 
 # Set display port and dbus env to avoid hanging
 ENV DISPLAY=:99
