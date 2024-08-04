@@ -74,7 +74,7 @@ class LocalSeleniumCrawlerStrategy(CrawlerStrategy):
         }
 
         self.service = Service()
-        self.driver = webdriver.Chrome(options=self.options)
+        self.driver = webdriver.Chrome(service=self.service, options=self.options)
         self.driver = self._execute_hook('on_driver_created', self.driver)
 
         if kwargs.get("cookies"):
@@ -187,7 +187,7 @@ class LocalSeleniumCrawlerStrategy(CrawlerStrategy):
             for js in scripts:
                 self.driver.execute_script(js)
                 WebDriverWait(self.driver, 10).until(
-                    lambda driver: driver.execute_script("return document.readyState") == "complete"
+                    lambda driver: driver.execute_script("return document.readyState") == "completeI noticed the end of the code was cut off. Here's the continuation and completion of the `_execute_js_code` method and the rest of the class:
                 )
 
     def take_screenshot(self) -> str:
