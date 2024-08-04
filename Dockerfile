@@ -19,8 +19,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gnupg2 \
     ca-certificates \
     apt-transport-https \
-    software-properties-common \
-    chromium
+    software-properties-common
+
+# Attempt to use an alternative source for Chromium
+RUN wget https://github.com/macchrome/winchrome/releases/download/v110.0.5481.100-r1026311-Linux/bin-arm64.zip && \
+    unzip bin-arm64.zip -d /usr/local/bin/chromium && \
+    ln -s /usr/local/bin/chromium/chrome /usr/local/bin/chromium-browser
+
+# Create the 'site' directory to avoid errors if it's missing
+RUN mkdir -p /usr/src/app/site
 
 # Set display port and dbus env to avoid hanging
 ENV DISPLAY=:99
