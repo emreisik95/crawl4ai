@@ -10,7 +10,7 @@ COPY . .
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Install dependencies for Chromium and ChromeDriver
+# Install dependencies for Chrome and ChromeDriver
 RUN apt-get update && apt-get install -y --no-install-recommends \
     wget \
     xvfb \
@@ -19,10 +19,21 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gnupg2 \
     ca-certificates \
     apt-transport-https \
-    software-properties-common \
-    chromium-browser \
-    chromium-chromedriver \
-    && rm -rf /var/lib/apt/lists/*
+    software-properties-common
+
+# Download and install Chromium for aarch64
+RUN wget https://github.com/chromium/chromium/archive/refs/heads/main.zip && \
+    unzip main.zip && \
+    cd chromium-main && \
+    ./build/install-build-deps.sh --arm && \
+    mkdir -p out/Default && \
+    gn gen out/Default --args='target_os="linux" target_cpu="arm64" is_debug=false' && \
+    ninja -C out/Default chrome
+
+# Download and install ChromeDriver
+RUN wget https://chromedriver.storage.googleapis.com/114.0.5735.90/chromedriver_linux64.zip && \
+    unzip chromedriver_linux64.zip -d /usr/local/bin/ && \
+    chmod +x /usr/local/bin/chromedriver
 
 # Install spacy library using pip
 RUN pip install spacy
