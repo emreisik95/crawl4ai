@@ -15,22 +15,17 @@ RUN apt-get update && \
     curl \
     unzip \
     gnupg \
+    xvfb \
     ca-certificates \
     apt-transport-https \
     software-properties-common && \
-    rm -rf /var/lib/apt/lists/*
-
-# Add Google Chrome's official GPG key and repository using the new method
-RUN wget -q -O /usr/share/keyrings/google-chrome-keyring.gpg https://dl.google.com/linux/linux_signing_key.pub && \
-    echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome-keyring.gpg] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list && \
-    apt-get update && \
-    apt-get install -y --no-install-recommends google-chrome-stable && \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/*    
 
 # Copy the application code
 COPY . .
 
 # Install Crawl4AI using the local setup.py with the specified option
+# and download models only for torch, transformer, or all options
 RUN if [ "$INSTALL_OPTION" = "all" ]; then \
         pip install --no-cache-dir .[all] && \
         crawl4ai-download-models; \
@@ -44,11 +39,21 @@ RUN if [ "$INSTALL_OPTION" = "all" ]; then \
         pip install --no-cache-dir .; \
     fi
 
-# Set environment variables
+# Install Google Chrome using the correct method
+RUN wget -q -O /usr/share/keyrings/google-chrome-keyring.gpg https://dl.google.com/linux/linux_signing_key.pub && \
+    echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome-keyring.gpg] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list && \
+    apt-get update && \
+    apt-get install -y google-chrome-stable && \
+    rm -rf /var/lib/apt/lists/*
+
+# Set environment to use Chrome properly
 ENV CHROME_BIN=/usr/bin/google-chrome \
     DISPLAY=:99 \
     DBUS_SESSION_BUS_ADDRESS=/dev/null \
     PYTHONUNBUFFERED=1
+
+# Ensure the PATH environment variable includes the location of the installed packages
+ENV PATH=/opt/conda/bin:$PATH   
 
 # Make port 80 available to the world outside this container
 EXPOSE 80
@@ -60,4 +65,4 @@ RUN pip install mkdocs mkdocs-terminal
 RUN mkdocs build
 
 # Run uvicorn
-CMD ["sh", "-c", "Xvfb :99 -screen 0 1920x1080x16 & uvicorn main:app --host 0.0.0.0 --port 80 --workers 4"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80", "--workers", "4"]
