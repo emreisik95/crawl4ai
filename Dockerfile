@@ -21,15 +21,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     apt-transport-https \
     software-properties-common
 
-# Download and install Chromium
-RUN wget https://commondatastorage.googleapis.com/chromium-browser-snapshots/Linux_arm64/912596/chrome-linux.zip && \
-    unzip chrome-linux.zip -d /usr/local/bin/chromium && \
+# Attempt to use an alternative source for Chromium
+RUN wget https://github.com/macchrome/winchrome/releases/download/v110.0.5481.100-r1026311-Linux/bin-arm64.zip && \
+    unzip bin-arm64.zip -d /usr/local/bin/chromium && \
     ln -s /usr/local/bin/chromium/chrome /usr/local/bin/chromium-browser
-
-# Download and install ChromeDriver
-RUN wget https://chromedriver.storage.googleapis.com/114.0.5735.90/chromedriver_linux64.zip && \
-    unzip chromedriver_linux64.zip -d /usr/local/bin/ && \
-    chmod +x /usr/local/bin/chromedriver
 
 # Set display port and dbus env to avoid hanging
 ENV DISPLAY=:99
