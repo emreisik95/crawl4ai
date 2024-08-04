@@ -73,8 +73,9 @@ class LocalSeleniumCrawlerStrategy(CrawlerStrategy):
             'before_return_html': None
         }
 
-        self.service = Service()
-        self.driver = webdriver.Chrome(options=self.options)
+        # Specify the ChromeDriver path
+        chrome_service = Service(executable_path="/usr/bin/chromedriver")
+        self.driver = webdriver.Chrome(service=chrome_service, options=self.options)
         self.driver = self._execute_hook('on_driver_created', self.driver)
 
         if kwargs.get("cookies"):
