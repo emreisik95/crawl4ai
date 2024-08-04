@@ -43,22 +43,19 @@ RUN if [ "$INSTALL_OPTION" = "all" ]; then \
         pip install --no-cache-dir . numpy; \
     fi
 
-# Install the latest version of Chrome
-RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add - && \
-    echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list && \
-    apt-get update && \
-    apt-get install -y google-chrome-stable
+# Install Chromium for ARM64 architecture
+RUN apt-get update && \
+    apt-get install -y chromium
 
-# Install the latest version of ChromeDriver
-RUN CHROME_VERSION=$(google-chrome --version | grep -oE '[0-9.]+' | head -1) && \
-    CHROMEDRIVER_VERSION=$(wget -qO- "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION") && \
+# Install the latest version of ChromeDriver for ARM64
+RUN CHROMEDRIVER_VERSION=$(wget -qO- "https://chromedriver.storage.googleapis.com/LATEST_RELEASE") && \
     wget -q "https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip" && \
     unzip chromedriver_linux64.zip -d /usr/local/bin/ && \
     chmod +x /usr/local/bin/chromedriver && \
     rm chromedriver_linux64.zip
 
-# Set environment to use Chrome and ChromeDriver properly
-ENV CHROME_BIN=/usr/bin/google-chrome \
+# Set environment to use Chromium and ChromeDriver properly
+ENV CHROME_BIN=/usr/bin/chromium \
     DISPLAY=:99 \
     DBUS_SESSION_BUS_ADDRESS=/dev/null \
     PYTHONUNBUFFERED=1
