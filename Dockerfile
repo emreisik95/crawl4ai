@@ -40,10 +40,12 @@ RUN if [ "$INSTALL_OPTION" = "all" ]; then \
     fi
 
 # Install Google Chrome
-RUN wget -q -O /usr/share/keyrings/google-chrome-keyring.gpg https://dl.google.com/linux/linux_signing_key.pub && \
-    echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome-keyring.gpg] http://dl.google.com/linux/chrome/deb/ stable main" | tee /etc/apt/sources.list.d/google-chrome.list && \
+RUN wget -q https://dl.google.com/linux/linux_signing_key.pub && \
+    gpg --dearmor -o /usr/share/keyrings/google-chrome.gpg linux_signing_key.pub && \
+    echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" | tee /etc/apt/sources.list.d/google-chrome.list && \
     apt-get update && \
-    apt-get install -y google-chrome-stable
+    apt-get install -y google-chrome-stable && \
+    rm linux_signing_key.pub
 
 # Set environment to use Chrome properly
 ENV CHROME_BIN=/usr/bin/google-chrome \
