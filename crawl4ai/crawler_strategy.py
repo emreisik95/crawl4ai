@@ -15,6 +15,7 @@ import base64
 import requests
 import os
 from pathlib import Path
+import hashlib
 from .config import *
 from .utils import *
 
