@@ -7,7 +7,7 @@ ARG INSTALL_OPTION=default
 # Install dependencies and Chromium/ChromiumDriver
 RUN apt-get update && apt-get install -y --no-install-recommends \
     wget xvfb unzip curl gnupg2 ca-certificates apt-transport-https software-properties-common \
-    chromium chromium-driver && \
+    chromium chromium-driver fonts-liberation && \
     rm -rf /var/lib/apt/lists/*
 
 # Copy application code
@@ -33,12 +33,5 @@ ENV CHROME_BIN=/usr/bin/chromium \
     DBUS_SESSION_BUS_ADDRESS=/dev/null \
     PYTHONUNBUFFERED=1
 
-# Expose port 80
-EXPOSE 80
-
-# Install MkDocs and build documentation
-RUN pip install mkdocs mkdocs-terminal
-RUN mkdocs build
-
-# Command to run the application with Uvicorn
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80", "--workers", "4"]
+# Start Xvfb before running the application
+CMD ["sh", "-c", "Xvfb :99 -screen 0 1920x1080x16 & uvicorn main:app --host 0.0.0.0 --port 80 --workers 4"]
