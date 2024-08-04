@@ -31,7 +31,7 @@ class CrawlerStrategy(ABC):
         pass
     
     @abstractmethod
-    def take_screenshot(self, save_path: str):
+    def take_screenshot(self) -> str:
         pass
     
     @abstractmethod
@@ -59,18 +59,7 @@ class CloudCrawlerStrategy(CrawlerStrategy):
 
 class LocalSeleniumCrawlerStrategy(CrawlerStrategy):
     def __init__(self, use_cached_html=False, js_code=None, **kwargs):
-        self.options = Options()
-        self.options.headless = kwargs.get("headless", True)
-        self.options.add_argument("--disable-gpu")
-        self.options.add_argument("--window-size=1920,1080")
-        self.options.add_argument("--no-sandbox")
-        self.options.add_argument("--disable-dev-shm-usage")
-        self.options.add_argument("--disable-blink-features=AutomationControlled")
-        self.options.add_argument("--log-level=3")
-        
-        user_agent = kwargs.get("user_agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
-        self.options.add_argument(f"user-agent={user_agent}")
-        
+        self.options = self._initialize_options(kwargs)
         self.use_cached_html = use_cached_html
         self.js_code = js_code
         self.verbose = kwargs.get("verbose", False)
@@ -86,11 +75,26 @@ class LocalSeleniumCrawlerStrategy(CrawlerStrategy):
 
         self.service = Service()
         self.driver = webdriver.Chrome(options=self.options)
-        self.driver = self.execute_hook('on_driver_created', self.driver)
+        self.driver = self._execute_hook('on_driver_created', self.driver)
 
         if kwargs.get("cookies"):
             for cookie in kwargs.get("cookies"):
                 self.driver.add_cookie(cookie)
+
+    def _initialize_options(self, kwargs):
+        options = Options()
+        options.headless = kwargs.get("headless", True)
+        options.add_argument("--disable-gpu")
+        options.add_argument("--window-size=1920,1080")
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
+        options.add_argument("--disable-blink-features=AutomationControlled")
+        options.add_argument("--log-level=3")
+        
+        user_agent = kwargs.get("user_agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
+        options.add_argument(f"user-agent={user_agent}")
+        
+        return options
 
     def set_hook(self, hook_type: str, hook: Callable):
         if hook_type in self.hooks:
@@ -98,7 +102,7 @@ class LocalSeleniumCrawlerStrategy(CrawlerStrategy):
         else:
             raise ValueError(f"Invalid hook type: {hook_type}")
     
-    def execute_hook(self, hook_type: str, *args):
+    def _execute_hook(self, hook_type: str, *args):
         hook = self.hooks.get(hook_type)
         if hook:
             result = hook(*args)
@@ -110,7 +114,7 @@ class LocalSeleniumCrawlerStrategy(CrawlerStrategy):
         self.options.add_argument(f"user-agent={user_agent}")
         self.driver.quit()
         self.driver = webdriver.Chrome(service=self.service, options=self.options)
-        self.driver = self.execute_hook('on_user_agent_updated', self.driver)
+        self.driver = self._execute_hook('on_user_agent_updated', self.driver)
 
     def set_custom_headers(self, headers: dict):
         self.driver.execute_cdp_cmd('Network.enable', {})
@@ -134,7 +138,7 @@ class LocalSeleniumCrawlerStrategy(CrawlerStrategy):
                 return sanitize_input_encode(f.read())
 
         try:
-            self.driver = self.execute_hook('before_get_url', self.driver)
+            self.driver = self._execute_hook('before_get_url', self.driver)
             if self.verbose:
                 print(f"[LOG] 🕸️ Crawling {url} using LocalSeleniumCrawlerStrategy...")
             self.driver.get(url)
@@ -147,11 +151,11 @@ class LocalSeleniumCrawlerStrategy(CrawlerStrategy):
             )
             
             self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-            self.driver = self.execute_hook('after_get_url', self.driver)
+            self.driver = self._execute_hook('after_get_url', self.driver)
             html = sanitize_input_encode(self._ensure_page_load())
             
             if kwargs.get('bypass_headless', False) or html == "<html><head></head><body></body></html>":
-                self._handle_non_headless(url)
+                html = self._handle_non_headless(url)
 
             self._execute_js_code()
             
