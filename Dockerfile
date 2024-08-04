@@ -4,16 +4,20 @@ WORKDIR /usr/src/app
 
 ARG INSTALL_OPTION=default
 
+# Install dependencies and Chromium/ChromiumDriver
 RUN apt-get update && apt-get install -y --no-install-recommends \
     wget xvfb unzip curl gnupg2 ca-certificates apt-transport-https software-properties-common \
-    && apt-get install -y chromium chromium-driver
+    chromium chromium-driver
 
+# Copy application code
 COPY . .
 
+# Optional installation of Transformers based on INSTALL_OPTION
 RUN if [ "$INSTALL_OPTION" = "all" ] || [ "$INSTALL_OPTION" = "transformer" ]; then \
         pip install --no-cache-dir transformers; \
     fi
 
+# Install Python dependencies and specific packages based on INSTALL_OPTION
 RUN if [ "$INSTALL_OPTION" = "all" ]; then \
         pip install --no-cache-dir .[all] numpy && \
         crawl4ai-download-models; \
@@ -27,24 +31,18 @@ RUN if [ "$INSTALL_OPTION" = "all" ]; then \
         pip install --no-cache-dir . numpy; \
     fi
 
-RUN apt-get install -y firefox-esr wget && \
-    wget https://github.com/mozilla/geckodriver/releases/latest/download/geckodriver-v0.34.0-linux64.tar.gz && \
-    tar -xzf geckodriver-v0.34.0-linux64.tar.gz && \
-    mv geckodriver /usr/local/bin/ && \
-    chmod +x /usr/local/bin/geckodriver && \
-    rm geckodriver-v0.34.0-linux64.tar.gz
-
+# Environment variables for Chromium and Selenium
 ENV CHROME_BIN=/usr/bin/chromium \
     DISPLAY=:99 \
     DBUS_SESSION_BUS_ADDRESS=/dev/null \
     PYTHONUNBUFFERED=1
 
-ENV PATH=/opt/conda/bin:$PATH
-
+# Expose port 80
 EXPOSE 80
 
+# Install MkDocs and build documentation
 RUN pip install mkdocs mkdocs-terminal
-
 RUN mkdocs build
 
+# Command to run the application with Uvicorn
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80", "--workers", "4"]
