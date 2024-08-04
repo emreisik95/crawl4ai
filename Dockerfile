@@ -19,7 +19,7 @@ RUN apt-get update && \
     ca-certificates \
     apt-transport-https \
     software-properties-common && \
-    rm -rf /var/lib/apt/lists/*    
+    rm -rf /var/lib/apt/lists/*
 
 # Copy the application code
 COPY . .
@@ -40,8 +40,8 @@ RUN if [ "$INSTALL_OPTION" = "all" ]; then \
     fi
 
 # Install Google Chrome
-RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - && \
-    sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list' && \
+RUN wget -q -O /usr/share/keyrings/google-chrome-keyring.gpg https://dl.google.com/linux/linux_signing_key.pub && \
+    echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome-keyring.gpg] http://dl.google.com/linux/chrome/deb/ stable main" | tee /etc/apt/sources.list.d/google-chrome.list && \
     apt-get update && \
     apt-get install -y google-chrome-stable
 
@@ -52,7 +52,7 @@ ENV CHROME_BIN=/usr/bin/google-chrome \
     PYTHONUNBUFFERED=1
 
 # Ensure the PATH environment variable includes the location of the installed packages
-ENV PATH=/opt/conda/bin:$PATH   
+ENV PATH=/opt/conda/bin:$PATH
 
 # Make port 80 available to the world outside this container
 EXPOSE 80
