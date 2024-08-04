@@ -1,5 +1,4 @@
-# First stage: Build and install dependencies
-FROM python:3.10-slim-bookworm
+FROM python:3.11-slim-bookworm
 
 # Set the working directory in the container
 WORKDIR /usr/src/app
@@ -39,15 +38,13 @@ RUN if [ "$INSTALL_OPTION" = "all" ]; then \
         pip install --no-cache-dir .; \
     fi
 
-# Install Google Chrome using the correct method
-RUN wget -q -O /usr/share/keyrings/google-chrome-keyring.gpg https://dl.google.com/linux/linux_signing_key.pub && \
-    echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome-keyring.gpg] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list && \
-    apt-get update && \
-    apt-get install -y google-chrome-stable && \
+# Install Chromium
+RUN apt-get update && \
+    apt-get install -y chromium && \
     rm -rf /var/lib/apt/lists/*
 
-# Set environment to use Chrome properly
-ENV CHROME_BIN=/usr/bin/google-chrome \
+# Set environment to use Chromium properly
+ENV CHROME_BIN=/usr/bin/chromium \
     DISPLAY=:99 \
     DBUS_SESSION_BUS_ADDRESS=/dev/null \
     PYTHONUNBUFFERED=1
